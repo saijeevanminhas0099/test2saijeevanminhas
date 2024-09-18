@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Validation</title>
+  <style>
+    .error {
+      color: red;
+      display: block;
+    }
+    .invalid {
+      border-color: red;
+    }
+    .valid {
+      border-color: white;
+    }
+    #submitWrapper {
+      display: flex;
+      align-items: center;
+    }
+    #dots {
+      margin-right: 10px;
+      visibility: visible;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Booking Place for Your Dinner!</h1>
+
+  <form id="userForm">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name"><br><br>
+
+    <label for="phone">Phone number:</label>
+    <input type="text" id="phone" name="phone"><br><br>
+
+    <label>Select a time:</label><br>
+    <input type="radio" id="time1" name="time" value="05:00" checked>
+    <label for="time1"> 05:00</label><br>
+    <input type="radio" id="time2" name="time" value="06:00">
+    <label for="time2"> 06:00</label><br>
+    <input type="radio" id="time3" name="time" value="07:00">
+    <label for="time3"> 07:00</label><br>
+    <input type="radio" id="time4" name="time" value="08:00">
+    <label for="time4"> 08:00</label><br><br>
+
+    <label>What would you like to have with us?:</label><br>
+    <input type="checkbox" id="option1" name="option1" value="Starters">
+    <label for="option1"> Starters</label><br>
+    <input type="checkbox" id="option2" name="option2" value="Main Course">
+    <label for="option2"> Main Course</label><br>
+    <input type="checkbox" id="option3" name="option3" value="Desserts">
+    <label for="option3"> Desserts</label><br>
+    <input type="checkbox" id="option4" name="option4" value="Drinks">
+    <label for="option4"> Drinks</label><br><br>
+
+    <div id="submitWrapper">
+      <button type="submit" id="submitBtn" disabled>Submit</button>
+      <span id="dots">...</span>
+    </div>
+    <span id="formError" class="error"></span>
+    <span id="message"></span>
+  </form>
+
+  <script>
+    const nameInput = document.getElementById('name');
+    const phoneInput = document.getElementById('phone');
+    const submitBtn = document.getElementById('submitBtn');
+    const formError = document.getElementById('formError');
+    const timeInputs = document.querySelectorAll('input[name="time"]');
+    const dots = document.getElementById('dots');
+
+    function getSelectedTime() {
+      let selectedTime = '05:00'; // Default value
+      for (const timeInput of timeInputs) {
+        if (timeInput.checked) {
+          selectedTime = timeInput.value;
+          break;
+        }
+      }
+      return selectedTime;
+    }
+
+    function getSelectedOptions() {
+      const selectedOptions = [];
+      document.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+        selectedOptions.push(checkbox.value);
+      });
+      return selectedOptions.join(', ');
+    }
+
+    function validateName() {
+      const nameValue = nameInput.value.trim();
+      const nameParts = nameValue.split(' ');
+
+      if (nameValue === '') {
+        formError.textContent = 'Error: Name is empty';
+        nameInput.classList.add('invalid');
+        return false;
+      } else if (nameParts.length === 1) {
+        formError.textContent = 'Error: Last name is required';
+        nameInput.classList.add('invalid');
+        return false;
+      } else {
+        formError.textContent = '';
+        nameInput.classList.remove('invalid');
+        nameInput.classList.add('valid');
+        return true;
+      }
+    }
+
+    function validatePhone() {
+      const phoneValue = phoneInput.value.trim();
+      const phonePattern = /^[0-9][0-9a-zA-Z]{5}$/;
+      if (phoneValue === '') {
+        formError.textContent = 'Error: Phone number is empty';
+        phoneInput.classList.add('invalid');
+        return false;
+      } else if (!phonePattern.test(phoneValue)) {
+        formError.textContent = 'Error: Phone number must start with a number and have exactly 6 characters';
+        phoneInput.classList.add('invalid');
+        return false;
+      } else {
+        formError.textContent = '';
+        phoneInput.classList.remove('invalid');
+        phoneInput.classList.add('valid');
+        return true;
+      }
+    }
+
+    function enableSubmit() {
+      if (validateName() && validatePhone()) {
+        submitBtn.disabled = false;
+        dots.style.visibility = 'hidden';  // Hide the dots when the form is valid
+      } else {
+        submitBtn.disabled = true;
+        dots.style.visibility = 'visible';  // Show the dots if the form is incomplete
+      }
+    }
+
+    nameInput.addEventListener('blur', validateName);
+    phoneInput.addEventListener('blur', validatePhone);
+    nameInput.addEventListener('input', enableSubmit);
+    phoneInput.addEventListener('input', enableSubmit);
+
+    document.getElementById('userForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      if (validateName() && validatePhone()) {
+        const userName = nameInput.value.trim();
+        const userPhone = phoneInput.value.trim();
+        const selectedTime = getSelectedTime();
+        const selectedOptions = getSelectedOptions();
+        document.getElementById('message').textContent = 
+          `Booking confirmed for ${userName} (Phone: ${userPhone}) at ${selectedTime}. You have selected: ${selectedOptions}`;
+        formError.textContent = ''; // Clear any previous error message
+      } else {
+        formError.textContent = 'Error: Please check your inputs';
+      }
+    });
+  </script>
+</body>
+</html>
